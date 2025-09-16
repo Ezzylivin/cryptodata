@@ -7,8 +7,12 @@ app = Flask(__name__)
 
 # This is the function from your script, now wrapped in an API endpoint
 def get_coinbase_ohlcv(symbol, timeframe, limit=100):
+    """Fetches OHLCV data from Coinbase Advanced Trade with proper exception handling."""
     try:
+        # We use 'coinbasepro' as the ID to access the advanced trading API.
         exchange = ccxt.coinbasepro()
+        
+        # Load the market information to ensure the symbol exists
         exchange.load_markets()
         
         if symbol not in exchange.markets:
@@ -45,6 +49,16 @@ def get_candles_endpoint():
         return jsonify({"success": False, "message": error}), 500
     
     return jsonify({"success": True, "data": candles})
+
+# NEW ROUTE: Provides all backtest options in a single API call
+@app.route('/api/data/options', methods=['GET'])
+def get_options_endpoint():
+    """Returns a predefined set of symbols and timeframes."""
+    # In a real app, this would dynamically fetch from the exchange
+    # For simplicity, we return a hardcoded list to ensure the front-end populates correctly.
+    symbols = ["BTC/USDT", "ETH/USDT", "SOL/USDT"]
+    timeframes = ["1m", "5m", "1h", "1d"]
+    return jsonify({"success": True, "symbols": symbols, "timeframes": timeframes})
 
 if __name__ == '__main__':
     # You can run this with a production-ready server like Gunicorn in production
